@@ -8,7 +8,7 @@ from torch import nn
 from practical_deep_stereo import network_blocks
 
 
-class ContractionBlock3d(nn.Module):
+class ContractionBlock(nn.Module):
     """Contraction block, that downsamples the input.
 
     The contraction blocks constitute the contraction part of
@@ -18,9 +18,8 @@ class ContractionBlock3d(nn.Module):
     """
 
     def __init__(self, number_of_features):
-        super(ContractionBlock3d, self).__init__()
-        self._downsampling_2x = \
-            network_blocks.convolutional_block_3x3x3_stride_2(
+        super(ContractionBlock, self).__init__()
+        self._downsampling_2x = network_blocks.convolutional_block_3x3x3_stride_2(
             number_of_features, 2 * number_of_features)
         self._smoothing = network_blocks.convolutional_block_3x3x3(
             2 * number_of_features, 2 * number_of_features)
@@ -31,7 +30,7 @@ class ContractionBlock3d(nn.Module):
             output_of_downsampling_2x)
 
 
-class ExpansionBlock3d(nn.Module):
+class ExpansionBlock(nn.Module):
     """Expansion block, that upsamples the input.
 
     The expansion blocks constitute the expansion part of
@@ -44,7 +43,7 @@ class ExpansionBlock3d(nn.Module):
     """
 
     def __init__(self, number_of_features):
-        super(ExpansionBlock3d, self).__init__()
+        super(ExpansionBlock, self).__init__()
         self._upsampling_2x = \
             network_blocks.transposed_convolutional_block_4x4x4_stride_2(
                     number_of_features, number_of_features // 2)
@@ -77,11 +76,11 @@ class Regularization(nn.Module):
         self._smoothing = network_blocks.convolutional_block_3x3x3(
             number_of_features, number_of_features)
         self._contraction_blocks = nn.ModuleList([
-            ContractionBlock3d(number_of_features * scale)
+            ContractionBlock(number_of_features * scale)
             for scale in [1, 2, 4, 8]
         ])
         self._expansion_blocks = nn.ModuleList([
-            ExpansionBlock3d(number_of_features * scale)
+            ExpansionBlock(number_of_features * scale)
             for scale in [16, 8, 4, 2]
         ])
         self._upsample_to_halfsize = \
